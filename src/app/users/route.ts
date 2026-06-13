@@ -1,9 +1,14 @@
-import { RenderCard } from "@/components/RenderCard";
+import { RenderCard, ThemeId, THEMES } from "@/components/RenderCard";
 import { getUserPresence } from "@/lib/discord";
 import { NextRequest, NextResponse } from "next/server";
 
+const VALID_THEMES = new Set<ThemeId>(THEMES.map((t) => t.id));
+
 export async function GET(req: NextRequest) {
-  const id = new URL(req.url).searchParams.get("id");
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+  const rawTheme = searchParams.get("theme") ?? "light";
+  const theme: ThemeId = VALID_THEMES.has(rawTheme as ThemeId) ? (rawTheme as ThemeId) : "light";
 
   if (!id || !/^\d{17,19}$/.test(id)) {
     return NextResponse.json({ error: "Invalid Discord ID" }, { status: 400 });
@@ -19,7 +24,7 @@ export async function GET(req: NextRequest) {
       "Cache-Control": "no-cache, no-store, must-revalidate",
     });
 
-    return new NextResponse(RenderCard({ user }), { headers });
+    return new NextResponse(RenderCard({ user, theme }), { headers });
   } catch (error) {
     console.error("[discord]", error);
     return NextResponse.json({ error: "User not found or not in guild" }, { status: 500 });
