@@ -15,6 +15,7 @@ export const THEMES: { id: ThemeId; label: string }[] = [
 interface T {
   cardBg: string;
   fullGrad: boolean;      // vivid: gradient covers entire card, no banner split
+  bodyGrad: boolean;      // vivid: gradient below banner (keeps banner, colors body)
   gradFrom: string;
   gradTo: string;
   showBannerImg: boolean;
@@ -78,7 +79,7 @@ function getTheme(id: ThemeId, pColor: string, subColor: string): T {
   switch (id) {
     case "dark":
       return {
-        cardBg: "#1e1f22", fullGrad: false, gradFrom: "", gradTo: "",
+        cardBg: "#1e1f22", fullGrad: false, bodyGrad: false, gradFrom: "", gradTo: "",
         showBannerImg: true,
         bannerFallFrom: darken(pColor, 0.2), bannerFallTo: darken(pColor, 0.5),
         ink: "#e8eaed", inkMidOp: 0.5, inkFaintOp: 0.3,
@@ -91,11 +92,12 @@ function getTheme(id: ThemeId, pColor: string, subColor: string): T {
 
     case "vivid":
       return {
-        cardBg: pColor, fullGrad: true, gradFrom: pColor, gradTo: dp,
-        showBannerImg: false,
-        bannerFallFrom: pColor, bannerFallTo: dp,
+        // Banner stays; card body below banner is p_color gradient
+        cardBg: pColor, fullGrad: false, bodyGrad: true, gradFrom: pColor, gradTo: dp,
+        showBannerImg: true,
+        bannerFallFrom: darken(pColor, 0.1), bannerFallTo: pColor,
         ink: "#ffffff", inkMidOp: 0.65, inkFaintOp: 0.45,
-        actBg: "#ffffff", actBgOp: 0.1,
+        actBg: "#ffffff", actBgOp: 0.08,
         divColor: "#ffffff", divOp: 0.2,
         badgeBg: "#ffffff", badgeBgOp: 0.22, badgeFg: "#ffffff",
         elapsedColor: "#ffffff", elapsedOp: 0.7,
@@ -104,7 +106,7 @@ function getTheme(id: ThemeId, pColor: string, subColor: string): T {
 
     case "minimal":
       return {
-        cardBg: "#ffffff", fullGrad: false, gradFrom: "", gradTo: "",
+        cardBg: "#ffffff", fullGrad: false, bodyGrad: false, gradFrom: "", gradTo: "",
         showBannerImg: true,
         bannerFallFrom: "#c4c8ce", bannerFallTo: "#9298a0",
         ink: "#1a1a1a", inkMidOp: 0.42, inkFaintOp: 0.25,
@@ -117,7 +119,7 @@ function getTheme(id: ThemeId, pColor: string, subColor: string): T {
 
     case "midnight":
       return {
-        cardBg: "#0b0b14", fullGrad: false, gradFrom: "", gradTo: "",
+        cardBg: "#0b0b14", fullGrad: false, bodyGrad: false, gradFrom: "", gradTo: "",
         showBannerImg: true,
         bannerFallFrom: darken(pColor, 0.4), bannerFallTo: dp2,
         ink: "#dde0f5", inkMidOp: 0.5, inkFaintOp: 0.3,
@@ -130,7 +132,7 @@ function getTheme(id: ThemeId, pColor: string, subColor: string): T {
 
     default: // light
       return {
-        cardBg: "#ffffff", fullGrad: false, gradFrom: "", gradTo: "",
+        cardBg: "#ffffff", fullGrad: false, bodyGrad: false, gradFrom: "", gradTo: "",
         showBannerImg: true,
         bannerFallFrom: pColor, bannerFallTo: lighten(pColor, 0.35),
         ink: "#0d0d0d", inkMidOp: 0.45, inkFaintOp: 0.3,
@@ -280,11 +282,6 @@ export function RenderCard({
     <clipPath id="avatarClip"><circle cx="${AV_CX}" cy="${AV_CY}" r="${AV_R}"/></clipPath>
     ${hasArt ? `<clipPath id="artClip"><rect x="16" y="${ART_Y}" width="${ART_SIZE}" height="${ART_SIZE}" rx="8"/></clipPath>` : ""}
 
-    ${t.fullGrad ? `
-    <linearGradient id="vividGrad" x1="0" y1="0" x2="0" y2="${H}" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="${t.gradFrom}"/>
-      <stop offset="100%" stop-color="${t.gradTo}"/>
-    </linearGradient>` : `
     <linearGradient id="bannerGrad" x1="0" y1="0" x2="${W}" y2="${BANNER_H}" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="${t.bannerFallFrom}"/>
       <stop offset="100%" stop-color="${t.bannerFallTo}"/>
@@ -292,17 +289,20 @@ export function RenderCard({
     <linearGradient id="bannerFade" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="transparent"/>
       <stop offset="100%" stop-color="#000000"/>
-    </linearGradient>`}
+    </linearGradient>
+    ${t.bodyGrad ? `
+    <linearGradient id="bodyGrad" x1="0" y1="${BANNER_H}" x2="0" y2="${H}" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="${t.gradFrom}"/>
+      <stop offset="100%" stop-color="${t.gradTo}"/>
+    </linearGradient>` : ""}
   </defs>
 
   <g clip-path="url(#cardClip)">
 
-    ${t.fullGrad ? `
-    <!-- Vivid: full gradient background -->
-    <rect width="${W}" height="${H}" fill="url(#vividGrad)"/>
-    ` : `
     <!-- Base card color -->
     <rect width="${W}" height="${H}" fill="${t.cardBg}"/>
+    <!-- Vivid: p_color gradient body below banner -->
+    ${t.bodyGrad ? `<rect x="0" y="${BANNER_H}" width="${W}" height="${H - BANNER_H}" fill="url(#bodyGrad)"/>` : ""}
     <!-- Activity section tint -->
     ${activity ? `<rect x="0" y="${DIVIDER_Y}" width="${W}" height="${H - DIVIDER_Y}" fill="${t.actBg}" fill-opacity="${t.actBgOp}"/>` : ""}
     <!-- Banner -->
@@ -310,7 +310,6 @@ export function RenderCard({
       ? `<image x="0" y="0" width="${W}" height="${BANNER_H}" href="${bannerUrl}" clip-path="url(#bannerClip)" preserveAspectRatio="xMidYMid slice"/>
          <rect x="0" y="${BANNER_H - 28}" width="${W}" height="28" fill="url(#bannerFade)" fill-opacity="0.4"/>`
       : `<rect width="${W}" height="${BANNER_H}" fill="url(#bannerGrad)"/>`}
-    `}
 
     <!-- Avatar ring -->
     <circle cx="${AV_CX}" cy="${AV_CY}" r="${AV_R + 3.5}" fill="${t.avatarRing}"/>
