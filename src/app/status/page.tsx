@@ -14,11 +14,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     return { title: "LantraStatus" };
   }
 
-  const cardParams = new URLSearchParams({ id });
-  if (theme) cardParams.set("theme", theme);
-  if (size)  cardParams.set("size", size);
-  if (hide)  cardParams.set("hide", hide);
-  const cardUrl = `${APP_URL}/users?${cardParams}`;
+  const pngUrl = `${APP_URL}/card-png?id=${id}`;
 
   let title = "Discord Status";
   let description = "Live Discord presence card";
@@ -42,14 +38,14 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     openGraph: {
       title,
       description,
-      images: [{ url: cardUrl, width: 440, height: 200 }],
+      images: [{ url: pngUrl, width: 600, height: 240 }],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [cardUrl],
+      images: [pngUrl],
     },
   };
 }
