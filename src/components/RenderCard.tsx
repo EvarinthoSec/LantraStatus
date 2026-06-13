@@ -141,11 +141,14 @@ function escapeXml(s:string): string {
 function clip(s:string,max:number): string {
   return s.length>max ? s.slice(0,max-1)+"…" : s;
 }
+function proxy(url: string): string {
+  return `/proxy?url=${encodeURIComponent(url)}`;
+}
 function getArtworkUrl(appId:string|undefined, img:string): string {
   if(!img) return "";
-  if(img.startsWith("mp:external/")) return img.replace("mp:external/","https://media.discordapp.net/external/");
-  if(img.startsWith("spotify:")) return `https://i.scdn.co/image/${img.replace("spotify:","")}`;
-  if(appId) return `https://cdn.discordapp.com/app-assets/${appId}/${img}.png?size=80`;
+  if(img.startsWith("mp:external/")) return proxy(img.replace("mp:external/","https://media.discordapp.net/external/"));
+  if(img.startsWith("spotify:")) return proxy(`https://i.scdn.co/image/${img.replace("spotify:","")}`);
+  if(appId) return proxy(`https://cdn.discordapp.com/app-assets/${appId}/${img}.png?size=80`);
   return "";
 }
 function formatElapsed(ms:number): string {
@@ -215,20 +218,20 @@ export function RenderCard({
   // ─── User display ─────────────────────────────────────────────────────────
   const displayName = escapeXml(clip(discord_user.global_name || discord_user.username, 22));
   const username    = escapeXml(discord_user.username);
-  const avatarUrl   = escapeXml(
+  const avatarUrl   = escapeXml(proxy(
     discord_user.avatar
       ? `https://cdn.discordapp.com/avatars/${discord_user.id}/${discord_user.avatar}.webp?size=128`
       : `https://cdn.discordapp.com/embed/avatars/${parseInt(discord_user.discriminator||"0",10)%5}.png`
-  );
+  ));
   const bannerUrl = (t.showBannerImg && !hideBanner && discord_user.banner)
-    ? escapeXml(`https://cdn.discordapp.com/banners/${discord_user.id}/${discord_user.banner}.${
-        discord_user.banner.startsWith("a_")?"gif":"webp"}?size=480`)
+    ? escapeXml(proxy(`https://cdn.discordapp.com/banners/${discord_user.id}/${discord_user.banner}.${
+        discord_user.banner.startsWith("a_")?"gif":"webp"}?size=480`))
     : null;
 
   // ─── Custom status ────────────────────────────────────────────────────────
   const csEmoji    = customStatus?.emoji;
   const csEmojiUrl = csEmoji?.id
-    ? escapeXml(`https://cdn.discordapp.com/emojis/${csEmoji.id}.${csEmoji.animated?"gif":"png"}?size=24`)
+    ? escapeXml(proxy(`https://cdn.discordapp.com/emojis/${csEmoji.id}.${csEmoji.animated?"gif":"png"}?size=24`))
     : null;
   const csEmojiChar = !csEmoji?.id && csEmoji?.name ? escapeXml(csEmoji.name) : null;
   const csText      = customStatus?.state ? escapeXml(clip(customStatus.state, 32)) : null;
