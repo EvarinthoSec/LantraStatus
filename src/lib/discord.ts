@@ -88,6 +88,9 @@ export async function getUserPresence(userId: string): Promise<IDiscordData> {
   const status = presence?.status ?? "offline";
   const activities = (presence?.activities ?? []).map(convertActivity);
 
+  // fetch full user via REST to get banner (not included in gateway presence)
+  const fullUser = await client.users.fetch(userId, { force: true });
+
   return {
     discord_user: {
       id: member.user.id,
@@ -100,6 +103,9 @@ export async function getUserPresence(userId: string): Promise<IDiscordData> {
       bot: member.user.bot,
       clan: null,
       avatar_decoration_data: null,
+      banner: fullUser.banner ?? undefined,
+      banner_color: fullUser.hexAccentColor ?? null,
+      accent_color: fullUser.accentColor ?? null,
     },
     status,
     activities,

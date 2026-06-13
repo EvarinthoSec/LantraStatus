@@ -9,6 +9,9 @@ interface DiscordUser {
     bot: boolean;
     avatar_decoration_data: string | null;
     avatar: string;
+    banner?: string;
+    banner_color?: string | null;
+    accent_color?: number | null;
 }
 
 interface ActivityAsset {

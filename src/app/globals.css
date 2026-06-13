@@ -222,7 +222,7 @@
 .ls-placeholder {
   width: 440px;
   max-width: 100%;
-  aspect-ratio: 440 / 180;
+  aspect-ratio: 440 / 228;
   border: 1.5px dashed var(--ls-border);
   border-radius: 8px;
   display: flex;
