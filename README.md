@@ -9,9 +9,6 @@
 - [ ] Add Background
 - [ ] Add CSS Custom
 
-## Supports
-- API Discord User: [Masuru](https://github.com/Masuru-Project)
-
 ## Image
 ![svg](https://discord-status-profile.vercel.app/users?id=1236579719177306173)
 

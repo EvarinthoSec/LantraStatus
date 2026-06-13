@@ -165,7 +165,7 @@ export default function Home() {
       <footer className="ls-footer">
         <p>
           Join{" "}
-          <a href="https://discord.gg/s3j5vphByS" className="ls-link">
+          <a href="https://discord.gg/evarinthosec" className="ls-link">
             Discord
           </a>{" "}
           to enable status sharing
