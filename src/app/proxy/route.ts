@@ -34,6 +34,10 @@ export async function GET(req: NextRequest) {
   }
 
   const contentType = upstream.headers.get("content-type") ?? "image/png";
+  if (!/^(image|video|audio)\//.test(contentType)) {
+    return new NextResponse("Content-type not allowed", { status: 403 });
+  }
+
   const body = await upstream.arrayBuffer();
 
   return new NextResponse(body, {
@@ -41,6 +45,7 @@ export async function GET(req: NextRequest) {
       "Content-Type": contentType,
       "Cache-Control": "public, max-age=300, stale-while-revalidate=60",
       "Access-Control-Allow-Origin": "*",
+      "X-Content-Type-Options": "nosniff",
     },
   });
 }
