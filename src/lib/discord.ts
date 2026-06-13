@@ -65,9 +65,13 @@ function convertActivity(act: DjsActivity): Activity {
     timestamps: act.timestamps?.start
       ? { start: act.timestamps.start.getTime() }
       : undefined,
+    timestamps_end: act.timestamps?.end?.getTime() ?? undefined,
     assets: buildActivityAsset(act.assets),
     application_id: act.applicationId ?? undefined,
     flags: act.flags?.bitfield,
+    emoji: act.emoji
+      ? { name: act.emoji.name ?? "", id: act.emoji.id ?? undefined, animated: act.emoji.animated ?? false }
+      : undefined,
   };
 }
 

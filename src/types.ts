@@ -25,6 +25,12 @@ interface ActivityTimestamp {
     start: number;
 }
 
+interface ActivityEmoji {
+    name: string;
+    id?: string;
+    animated?: boolean;
+}
+
 interface Activity {
     type: number;
     state: string;
@@ -32,11 +38,13 @@ interface Activity {
     id: string;
     created_at: number;
     timestamps?: ActivityTimestamp;
+    timestamps_end?: number;
     session_id?: string;
     flags?: number;
     details?: string;
     assets?: ActivityAsset;
     application_id?: string;
+    emoji?: ActivityEmoji;
 }
 
 interface IDiscordData {
@@ -49,4 +57,4 @@ interface IDiscordData {
     active_on_discord_mobile: boolean;
     listening_to_spotify: boolean;
 }
-export type { DiscordUser, IDiscordData, Activity, ActivityAsset, ActivityTimestamp };
+export type { DiscordUser, IDiscordData, Activity, ActivityAsset, ActivityTimestamp, ActivityEmoji };
