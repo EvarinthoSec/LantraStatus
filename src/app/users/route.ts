@@ -1,23 +1,36 @@
-import { RenderCard } from "@/components/RenderCard";
-import { IDiscordData } from "@/types";
-import axios from "axios";
+import { RenderCard, ThemeId, SizeId, HideKey, THEMES } from "@/components/RenderCard";
+import { getUserPresence } from "@/lib/discord";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
-  const url = new URL(req.url);
-  const id = url.searchParams.get('id');
+const VALID_THEMES = new Set<ThemeId>(THEMES.map(t => t.id));
+const VALID_SIZES  = new Set<SizeId>(["normal", "compact"]);
+const VALID_HIDE   = new Set<HideKey>(["banner","activity","elapsed","customstatus"]);
 
-  if (!id) return NextResponse.json({ user: null }, { status: 400 });
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const id       = searchParams.get("id");
+  const rawTheme = searchParams.get("theme") ?? "light";
+  const rawSize  = searchParams.get("size")  ?? "normal";
+  const rawHide  = (searchParams.get("hide") ?? "").split(",").filter(Boolean);
+
+  const theme = VALID_THEMES.has(rawTheme as ThemeId) ? (rawTheme as ThemeId) : "light";
+  const size  = VALID_SIZES.has(rawSize as SizeId)    ? (rawSize  as SizeId)  : "normal";
+  const hide  = rawHide.filter((h): h is HideKey => VALID_HIDE.has(h as HideKey));
+
+  if (!id || !/^\d{17,19}$/.test(id)) {
+    return NextResponse.json({ error: "Invalid Discord ID" }, { status: 400 });
+  }
 
   try {
-    const user = await axios.get(`https://api.masuru.in.th/api/v1/discord/users/${id}`).then(res => res.data.data as IDiscordData);
-    const headers = new Headers();
-    headers.set("Content-Type", "image/svg+xml; charset=utf-8");
-    headers.set("content-security-policy", "default-src 'none'; img-src * data:; style-src 'unsafe-inline'");
-    const svgContent = RenderCard({ user });
-    return new NextResponse(svgContent.toString(), { headers });
+    const user = await getUserPresence(id);
+    const headers = new Headers({
+      "Content-Type": "image/svg+xml; charset=utf-8",
+      "content-security-policy": "default-src 'none'; img-src * data:; style-src 'unsafe-inline'",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+    });
+    return new NextResponse(RenderCard({ user, theme, size, hide }), { headers });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ user: null }, { status: 500 });
+    console.error("[discord]", error);
+    return NextResponse.json({ error: "User not found or not in guild" }, { status: 500 });
   }
 }
