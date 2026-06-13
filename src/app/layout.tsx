@@ -1,24 +1,23 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
-const inter = Inter({ subsets: ["latin"] });
-
 export const metadata: Metadata = {
-  title: "🐳 | Discord Status Profile",
-  description: "🏷️ Display your Discord Presence in your GitHub Profile",
+  title: "LantraStatus — Discord presence in your GitHub README",
+  description: "Paste your Discord ID, get an SVG embed URL. Display your live Discord status in any GitHub profile README.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <main>{children}</main>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <body>
+        {children}
         <Toaster />
       </body>
     </html>

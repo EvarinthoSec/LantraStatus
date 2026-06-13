@@ -1,5 +1,5 @@
 {
-  "name": "discordstatusprofile",
+  "name": "lantrastatus",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -16,7 +16,9 @@
     "axios": "^1.7.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "discord.js": "^14.26.4",
     "dotenv": "^16.4.5",
+    "geist": "^1.7.2",
     "lucide-react": "^0.439.0",
     "next": "14.2.5",
     "react": "^18",

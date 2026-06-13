@@ -40,3 +40,8 @@ next-env.d.ts
 .dev.vars
 package-lock.json
 bun.lockb
+.impeccable/live/
+.superpowers/brainstorm/77374-1781349986/
+PRODUCT.md
+.env
+.playwright-mcp/
